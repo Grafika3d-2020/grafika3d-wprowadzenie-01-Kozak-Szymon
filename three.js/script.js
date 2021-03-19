@@ -1,76 +1,50 @@
-const renderer = new THREE.WebGLRenderer({
-    antialias: true 
-});
-const scene = new THREE.Scene();
-renderer.setSize( window.innerWidth, window.innerHeight );
-document.body.appendChild( renderer.domElement );
+let scene, camera, renderer;
+function init() {
+    scene = new THREE.Scene();
 
-const camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 500 );
-camera.position.set ( 0, 0, 100 );
-camera.lookAt( 0, 0, 0 );
-let controls = new THREE.OrbitControls(camera, renderer.domElement);
+    camera = new THREE.PerspectiveCamera(55,window.innerWidth/window.innerHeight,45,30000);
+    camera.position.set(-900,-200,-900);
 
-    controls.addEventListener("change", renderer);
+    renderer = new THREE.WebGLRenderer({antialias:true});
+    renderer.setSize(window.innerWidth,window.innerHeight);
+    document.body.appendChild(renderer.domElement);
 
-const LineMaterial = new THREE.LineBasicMaterial( { color: 0x00ffff } );
-// const points = [];
-// points.push( new THREE.Vector3( -10, 0, 0 ) );
-// points.push( new THREE.Vector3( 0, 10, 0 ) );
-// points.push( new THREE.Vector3( 0, -10, 0 ) );
+    let controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.update();
+    controls.minDistance = 500;
+    controls.maxDistance = 1500;
 
-// // for (var i=1 ; i<15;i++){
-// // points.push( new THREE.Vector3( -5*i, -2*i, 0 ) );
-// // points.push( new THREE.Vector3( 3*i, 3*i, 0 ) );
-// // }
+    let materialArray = [];
 
-// const lineGeometry = new THREE.BufferGeometry().setFromPoints( points );
-// const line = new THREE.Line( lineGeometry, LineMaterial );
-// scene.add( line );
+    let texture_ft = new THREE.TextureLoader().load('img/barren_ft.jpg');
+    let texture_bk = new THREE.TextureLoader().load('img/barren_bk.jpg');
+    let texture_up = new THREE.TextureLoader().load('img/barren_up.jpg');
+    let texture_dn = new THREE.TextureLoader().load('img/barren_dn.jpg');
+    let texture_rt = new THREE.TextureLoader().load('img/barren_rt.jpg');
+    let texture_lf = new THREE.TextureLoader().load('img/barren_lf.jpg');
 
+    materialArray.push(new THREE.MeshBasicMaterial({map: texture_ft}));
+    materialArray.push(new THREE.MeshBasicMaterial({map: texture_bk}));
+    materialArray.push(new THREE.MeshBasicMaterial({map: texture_up}));
+    materialArray.push(new THREE.MeshBasicMaterial({map: texture_dn}));
+    materialArray.push(new THREE.MeshBasicMaterial({map: texture_rt}));
+    materialArray.push(new THREE.MeshBasicMaterial({map: texture_lf}));
 
-const lightl = new THREE.PointLight({color: 0x0fff00});
-scene.add( lightl );
-lightl.position.x = 50
-lightl.position.y = -20
-lightl.position.z = 10
+    console.log(materialArray);
 
-const light2 = new THREE.PointLight({color: 0x0fff00})
-scene.add( light2 );
-light2.position.set(-50,50,20);
+    for (let i = 0; i < 6; i++){
+        materialArray[i].side = THREE.BackSide;
+    }
 
-//FOG
-const near = 50;
-const far = 150;
-const color = 'pink';
-scene.fog = new THREE.Fog(color,near,far);
-scene.background = new THREE.Color(color);
-
-const colorwhite = new THREE.Color('hsl(106, 100%, 90%)')
-
-const width = 20;
-const height = 20;
-const deph = 80;
-const cubeGeometry = new THREE.BoxGeometry( width, height, deph );
-const cubeMaterial = new THREE.MeshPhongMaterial({
-    color: colorwhite,
-    shiness: 80
-})
-
-const cube = new THREE.Mesh( cubeGeometry, cubeMaterial );
-scene.add( cube );
-
-cube.rotation.z = 0;
-cube.rotation.x = 10;
-
-cube.position.x = 20;
-cube.position.y = 0;
-cube.position.z = 0;
-
-const animate =  () => {
-    requestAnimationFrame(animate);
-    
-    cube.rotation.x +=.01;
-    renderer.render( scene, camera );
+    let skyboxGeo = new THREE.BoxGeometry( 10000, 10000, 10000);
+    let skybox = new THREE.Mesh(skyboxGeo, materialArray);
+    scene.add(skybox);
+    animate();
 }
 
-animate();
+function animate(){
+    renderer.render(scene, camera);
+    requestAnimationFrame(animate);
+}
+
+init();
